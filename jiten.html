@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地球の自転と時差シミュレーター</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* スライダーのスタイル */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      margin-top: -8px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #475569;
+      border-radius: 2px;
+    }
+    
+    /* 地球の夜の影 */
+    .shadow-overlay {
+      background: linear-gradient(180deg, rgba(2,6,23,0) 45%, rgba(2,6,23,0.85) 55%, rgba(2,6,23,0.95) 100%);
+    }
+
+    /* 太陽の光 */
+    .sun-glow {
+      box-shadow: 0 0 50px 20px rgba(250, 204, 21, 0.15);
+      background: radial-gradient(circle, rgba(250,204,21,1) 0%, rgba(250,204,21,0.8) 40%, rgba(250,204,21,0) 100%);
+    }
+
+    /* 都市ラベルのトランジション（回転を滑らかに） */
+    .city-label-container {
+      transition: opacity 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-8 font-sans overflow-x-hidden flex flex-col items-center">
+
+  <div class="max-w-7xl w-full flex flex-col lg:flex-row gap-10 items-center lg:items-start justify-center">
+    
+    <!-- 左側：コントロールパネル -->
+    <div class="w-full lg:w-1/3 flex flex-col gap-6 z-10">
+      <div>
+        <h1 class="text-3xl font-bold mb-3 flex items-center gap-2">
+          <span class="text-4xl">🌍</span> 宇宙から見る時差
+        </h1>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          北極星から地球を見下ろしたシミュレーションです。<br>
+          太陽（上部）は固定され、地球が<strong>反時計回り</strong>に自転します。<br>
+          地球の右側が「朝」、左側が「夕方」、下半分が「夜」です。
+        </p>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+        <div class="flex items-center gap-4 mb-4">
+          <span class="text-xl">🕰️</span>
+          <input type="range" id="timeSlider" min="0" max="1440" value="540" step="1" class="w-full">
+        </div>
+        
+        <div class="flex gap-3">
+          <button id="playBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl transition flex justify-center items-center gap-2">
+            ▶️ 自転アニメーション
+          </button>
+          <button id="nowBtn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-4 rounded-xl transition">
+            現在時刻
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+        <h3 class="text-xs font-bold text-slate-500 mb-4 uppercase tracking-widest">現在の各都市の時刻</h3>
+        <div id="digitalClocks" class="space-y-2">
+          <!-- JSでリストを生成 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側：地球アニメーション領域 -->
+    <div class="w-full lg:w-2/3 flex justify-center items-center relative py-10">
+      
+      <!-- 全体のコンテナ (正方形) -->
+      <div class="relative w-full max-w-[550px] aspect-square flex justify-center items-center">
+        
+        <!-- 太陽 -->
+        <div class="absolute -top-12 lg:-top-16 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full sun-glow z-30 flex justify-center items-center">
+          <span class="text-4xl filter drop-shadow-lg">☀️</span>
+        </div>
+
+        <!-- 24時間の固定目盛り -->
+        <div id="dial" class="absolute inset-0 rounded-full border border-slate-700/50 pointer-events-none"></div>
+
+        <!-- 地球と夜の影のコンテナ -->
+        <div class="absolute inset-10 rounded-full shadow-[0_0_40px_rgba(59,130,246,0.15)] bg-slate-900">
+          
+          <!-- 回転する地球本体 -->
+          <div id="earth" class="absolute inset-0 rounded-full overflow-hidden transition-transform duration-75 ease-linear">
+            <!-- 経緯線グリッド (SVG) -->
+            <svg id="gridSvg" class="absolute inset-0 w-full h-full opacity-40" viewBox="0 0 100 100"></svg>
+            <!-- 都市のピンがここに追加されます -->
+          </div>
+          
+          <!-- 夜の影 (下半分を暗くする固定オーバーレイ) -->
+          <div class="shadow-overlay absolute inset-0 rounded-full pointer-events-none z-20"></div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 都市データ (lat=緯度, lng=経度)
+    // 今回は北極視点のため、南半球のシドニーは円のかなり外側（赤道より外）になります
+    const cities = [
+      { id: 'honolulu', name: 'ホノルル', lat: 21.3, lng: -157.8, offset: -10, color: '#f472b6' }, // Pink
+      { id: 'ny', name: 'ニューヨーク', lat: 40.7, lng: -74.0, offset: -5, color: '#4ade80' },     // Green
+      { id: 'london', name: 'ロンドン', lat: 51.5, lng: -0.1, offset: 0, color: '#f87171' },       // Red
+      { id: 'moscow', name: 'モスクワ', lat: 55.7, lng: 37.6, offset: 3, color: '#fb923c' },       // Orange
+      { id: 'tokyo', name: '東京', lat: 35.7, lng: 139.7, offset: 9, color: '#60a5fa' },         // Blue
+      { id: 'sydney', name: 'シドニー', lat: -33.9, lng: 151.2, offset: 11, color: '#c084fc' }      // Purple
+    ];
+
+    const slider = document.getElementById('timeSlider');
+    const playBtn = document.getElementById('playBtn');
+    const nowBtn = document.getElementById('nowBtn');
+    const earth = document.getElementById('earth');
+    const dial = document.getElementById('dial');
+    const digitalClocks = document.getElementById('digitalClocks');
+    const gridSvg = document.getElementById('gridSvg');
+
+    let isPlaying = false;
+    let animationInterval;
+    const cityLabels = []; // JSで更新するための参照配列
+    let totalElapsedMinutes = 0; // 累積の分数を管理する変数
+
+    // 1. 地球の経緯線グリッドを描画
+    function drawGrid() {
+      let svg = `<circle cx="50" cy="50" r="50" fill="#0f172a" />`;
+      // 緯線 (北極0, 赤道25, 南極50の半径比率)
+      [8.33, 16.66, 33.33, 41.66].forEach(r => {
+        svg += `<circle cx="50" cy="50" r="${r}" fill="none" stroke="#3b82f6" stroke-width="0.2" opacity="0.5"/>`;
+      });
+      // 赤道
+      svg += `<circle cx="50" cy="50" r="25" fill="none" stroke="#60a5fa" stroke-width="0.4" stroke-dasharray="1 1.5"/>`;
+      
+      // 経線 (15度＝1時間ごと)
+      for(let i=0; i<24; i++) {
+        const angle = i * 15;
+        const rad = angle * Math.PI / 180;
+        const x = 50 + 50 * Math.cos(rad);
+        const y = 50 + 50 * Math.sin(rad);
+        // ロンドン(経度0)のラインを目立たせる（初期配置で上が0度になるよう-90度=270度の位置）
+        const isPrime = (angle === 270);
+        svg += `<line x1="50" y1="50" x2="${x}" y2="${y}" stroke="${isPrime ? '#93c5fd' : '#3b82f6'}" stroke-width="${isPrime ? '0.5' : '0.2'}" opacity="${isPrime ? '0.8' : '0.4'}"/>`;
+      }
+      gridSvg.innerHTML = svg;
+    }
+
+    // 2. 24時間目盛りを描画
+    function drawDial() {
+      for (let i = 0; i < 24; i++) {
+        const angle = 180 - i * 15; // 0時は下(180), 12時は上(0)
+        const rad = (angle - 90) * Math.PI / 180;
+        const x = 50 + 50 * Math.cos(rad);
+        const y = 50 + 50 * Math.sin(rad);
+        
+        const tick = document.createElement('div');
+        tick.className = 'absolute transform -translate-x-1/2 -translate-y-1/2 text-slate-500 font-mono text-xs md:text-sm font-bold';
+        tick.style.left = `${x}%`;
+        tick.style.top = `${y}%`;
+        
+        // 太陽と月のアイコンを追加
+        if (i === 12) tick.innerHTML = '12<br><span class="text-[8px]">NOON</span>';
+        else if (i === 0) tick.innerHTML = '<span class="text-[8px]">MIDNIGHT</span><br>0';
+        else if (i === 6) tick.innerHTML = '6 (朝)';
+        else if (i === 18) tick.innerHTML = '(夕) 18';
+        else tick.innerText = i;
+        
+        dial.appendChild(tick);
+      }
+    }
+
+    // 3. 都市のピンとリストを生成
+    function initCities() {
+      cities.forEach(city => {
+        // 地球上での位置計算
+        const rPercent = ((90 - city.lat) / 180) * 50; // 中心(北極)からの距離
+        const theta = -city.lng; // 経度（東経は反時計回り＝負）
+        const rad = (theta - 90) * Math.PI / 180;
+        const x = 50 + rPercent * Math.cos(rad);
+        const y = 50 + rPercent * Math.sin(rad);
+
+        // --- 地球上のピン ---
+        const pinWrapper = document.createElement('div');
+        pinWrapper.className = 'absolute z-10';
+        pinWrapper.style.left = `${x}%`;
+        pinWrapper.style.top = `${y}%`;
+
+        // ドット
+        pinWrapper.innerHTML = `<div class="absolute transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" style="background-color: ${city.color};"></div>`;
+
+        // ラベル（逆回転させて常に正立させるためのコンテナ）
+        const labelContainer = document.createElement('div');
+        labelContainer.className = 'city-label-container absolute flex items-center gap-1.5 px-2 py-1 rounded bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 w-max';
+        // ドットから少し右に離す
+        labelContainer.style.left = '8px';
+        labelContainer.style.top = '0px';
+        labelContainer.style.transformOrigin = '-8px center'; // 回転軸をドットの中心に
+
+        labelContainer.innerHTML = `
+          <span class="text-[10px] font-bold text-slate-200 tracking-wider">${city.name}</span>
+          <span class="time-text font-mono text-xs font-bold" style="color: ${city.color};">--:--</span>
+        `;
+        
+        pinWrapper.appendChild(labelContainer);
+        earth.appendChild(pinWrapper);
+
+        // --- 左側のデジタル時計リスト ---
+        // innerHTML += だと既存の要素が再構築されて参照が切れるため、insertAdjacentHTMLを使用
+        digitalClocks.insertAdjacentHTML('beforeend', `
+          <div class="flex justify-between items-center px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50" id="digital-${city.id}">
+            <div class="flex items-center gap-3">
+              <div class="w-2.5 h-2.5 rounded-full shadow-[0_0_5px_currentColor]" style="background-color: ${city.color}; color: ${city.color};"></div>
+              <span class="font-bold text-slate-300 text-sm">${city.name}</span>
+            </div>
+            <div class="font-mono text-xl font-bold text-slate-100 time-val tracking-tighter">--:--</div>
+          </div>
+        `);
+
+        // 参照を保存
+        cityLabels.push({ 
+          city: city, 
+          labelEl: labelContainer, 
+          timeEl: labelContainer.querySelector('.time-text'),
+          digitalEl: document.querySelector(`#digital-${city.id} .time-val`)
+        });
+      });
+    }
+
+    // 4. 時刻とアニメーションの更新処理
+    function updateSimulation() {
+      // スライダーの値ではなく、累積時間を使って回転角度を計算（無限に回り続けるようにする）
+      const earthRotate = 180 - (totalElapsedMinutes / 1440) * 360;
+      earth.style.transform = `rotate(${earthRotate}deg)`;
+
+      // 各都市の時刻計算用に、0〜1440の範囲に変換した分数を取得
+      let utcMinutes = totalElapsedMinutes % 1440;
+      if (utcMinutes < 0) utcMinutes += 1440;
+
+      cityLabels.forEach(item => {
+        // 各都市の時刻計算
+        let localMins = (utcMinutes + item.city.offset * 60) % 1440;
+        if (localMins < 0) localMins += 1440;
+        const h = Math.floor(localMins / 60);
+        const m = localMins % 60;
+        const timeString = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        
+        // 表示の更新
+        item.timeEl.innerText = timeString;
+        item.digitalEl.innerText = timeString;
+        
+        // ラベルの逆回転（地球が回っても文字がまっすぐ読めるようにする）
+        item.labelEl.style.transform = `translateY(-50%) rotate(${-earthRotate}deg)`;
+        
+        // 夜間（影に入る）時間はラベルの透明度を下げて雰囲気を出す
+        if (h >= 18 || h < 6) {
+          item.labelEl.style.opacity = '0.5';
+        } else {
+          item.labelEl.style.opacity = '1';
+        }
+      });
+    }
+
+    // 5. 現在時刻と同期
+    function syncToCurrentTime() {
+      const now = new Date();
+      const utcMins = (now.getUTCHours() * 60) + now.getUTCMinutes();
+      
+      // 現在の「何回転目か（日数）」を維持したまま時刻をセット
+      const days = Math.floor(totalElapsedMinutes / 1440);
+      totalElapsedMinutes = days * 1440 + utcMins;
+      
+      slider.value = utcMins;
+      updateSimulation();
+    }
+
+    // イベントリスナー
+    slider.addEventListener('input', () => {
+      // スライダー手動操作時も「何回転目か」を維持する
+      const days = Math.floor(totalElapsedMinutes / 1440);
+      totalElapsedMinutes = days * 1440 + parseInt(slider.value);
+      updateSimulation();
+    });
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playBtn.innerHTML = '⏸️ 停止する';
+        playBtn.classList.replace('bg-blue-600', 'bg-rose-600');
+        playBtn.classList.replace('hover:bg-blue-500', 'hover:bg-rose-500');
+        
+        animationInterval = setInterval(() => {
+          totalElapsedMinutes += 2; // 累積時間を増やし続ける
+          
+          // スライダーの見た目だけを0〜1439でループさせる
+          let val = totalElapsedMinutes % 1440;
+          if (val < 0) val += 1440;
+          slider.value = val;
+          
+          updateSimulation();
+        }, 30); // 30msごとに更新（滑らかな回転）
+      } else {
+        playBtn.innerHTML = '▶️ 自転アニメーション';
+        playBtn.classList.replace('bg-rose-600', 'bg-blue-600');
+        playBtn.classList.replace('hover:bg-rose-500', 'hover:bg-blue-500');
+        clearInterval(animationInterval);
+      }
+    });
+
+    nowBtn.addEventListener('click', () => {
+      if(isPlaying) playBtn.click();
+      syncToCurrentTime();
+    });
+
+    // 初期化実行
+    drawGrid();
+    drawDial();
+    initCities();
+    syncToCurrentTime();
+
+  </script>
+</body>
+</html>
