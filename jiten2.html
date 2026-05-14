@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地軸の傾きと時差 3Dシミュレーター</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js本体とマウス操作用モジュール -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    /* スライダーのスタイル */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      margin-top: -8px;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #475569;
+      border-radius: 2px;
+    }
+    
+    /* 3Dキャンバス用の設定 */
+    #three-container canvas {
+      display: block;
+      outline: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-8 font-sans overflow-x-hidden flex flex-col items-center">
+
+  <div class="max-w-7xl w-full flex flex-col lg:flex-row gap-8 items-center lg:items-stretch justify-center">
+    
+    <!-- 左側：コントロールパネル -->
+    <div class="w-full lg:w-1/3 flex flex-col gap-6 z-10">
+      <div>
+        <h1 class="text-3xl font-bold mb-3 flex items-center gap-2">
+          <span class="text-4xl">🌍</span> 3D時差シミュレーター
+        </h1>
+        <p class="text-slate-400 text-sm leading-relaxed mb-3">
+          地球を真横から見てみましょう。地軸が<strong>23.4度</strong>傾いたまま自転する様子を再現しました。右から太陽の光が当たっています。
+        </p>
+        <div class="bg-blue-900/30 border border-blue-800/50 rounded-lg p-3 text-xs text-blue-200">
+          💡 <strong>TIPS:</strong> このシミュレーションは北半球が太陽に向かって傾く「夏至」の状態です。北半球の都市（ロンドン等）は昼が長く、南半球（シドニー）は夜が長いことが視覚的にわかります。
+        </div>
+      </div>
+
+      <!-- 操作パネル -->
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+        <div class="flex items-center gap-4 mb-4">
+          <span class="text-xl">🕰️</span>
+          <input type="range" id="timeSlider" min="0" max="1440" value="540" step="1" class="w-full">
+        </div>
+        
+        <div class="flex gap-3">
+          <button id="playBtn" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-4 rounded-xl transition flex justify-center items-center gap-2">
+            ▶️ 自転アニメーション
+          </button>
+          <button id="nowBtn" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 px-4 rounded-xl transition">
+            現在時刻
+          </button>
+        </div>
+      </div>
+
+      <!-- デジタル時計リスト -->
+      <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl flex-1">
+        <h3 class="text-xs font-bold text-slate-500 mb-4 uppercase tracking-widest">現在の各都市の時刻</h3>
+        <div id="digitalClocks" class="space-y-2">
+          <!-- JSでリストを生成 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 右側：3Dアニメーション領域 -->
+    <div class="w-full lg:w-2/3 flex flex-col relative min-h-[450px] lg:min-h-[600px] bg-[#050b14] rounded-2xl overflow-hidden border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)]" id="three-container">
+      
+      <!-- 都市のラベルを配置するコンテナ -->
+      <div id="labels-container" class="absolute inset-0 pointer-events-none z-10 overflow-hidden"></div>
+      
+      <!-- UI：マウス操作のヒント -->
+      <div class="absolute left-4 top-4 bg-black/40 backdrop-blur-sm border border-slate-700/50 text-slate-300 text-xs px-3 py-1.5 rounded-full pointer-events-none z-20 flex items-center gap-2">
+        <span>👆</span> マウスや指でドラッグして視点を回せます
+      </div>
+
+      <!-- UI：太陽光のインジケーター -->
+      <div class="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none z-20">
+        <span class="text-4xl filter drop-shadow-[0_0_15px_rgba(250,204,21,0.9)]">☀️</span>
+        <span class="text-[10px] text-yellow-400 font-bold mt-2 tracking-widest">太陽光</span>
+        <div class="w-16 h-0.5 bg-yellow-400/50 mt-2 rounded"></div>
+        <div class="w-16 h-0.5 bg-yellow-400/30 mt-1 rounded"></div>
+        <div class="w-16 h-0.5 bg-yellow-400/10 mt-1 rounded"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // --- 1. 都市データと初期設定 ---
+    const cities = [
+      { id: 'honolulu', name: 'ホノルル', lat: 21.3, lng: -157.8, offset: -10, color: '#f472b6' }, // ピンク
+      { id: 'ny', name: 'ニューヨーク', lat: 40.7, lng: -74.0, offset: -5, color: '#4ade80' },     // 緑
+      { id: 'london', name: 'ロンドン', lat: 51.5, lng: -0.1, offset: 0, color: '#f87171' },       // 赤
+      { id: 'moscow', name: 'モスクワ', lat: 55.7, lng: 37.6, offset: 3, color: '#fb923c' },       // オレンジ
+      { id: 'tokyo', name: '東京', lat: 35.7, lng: 139.7, offset: 9, color: '#60a5fa' },         // 青
+      { id: 'sydney', name: 'シドニー', lat: -33.9, lng: 151.2, offset: 11, color: '#c084fc' }      // 紫
+    ];
+
+    const slider = document.getElementById('timeSlider');
+    const playBtn = document.getElementById('playBtn');
+    const nowBtn = document.getElementById('nowBtn');
+    const digitalClocks = document.getElementById('digitalClocks');
+    const labelsContainer = document.getElementById('labels-container');
+
+    let isPlaying = false;
+    let animationInterval;
+    let totalElapsedMinutes = 0; // 累積分数
+    
+    // Three.js 用の変数
+    let scene, camera, renderer, controls;
+    let earthGroup, rotationGroup;
+
+    // 画面ロード時にシミュレーターを起動
+    window.onload = function() {
+      initUI();
+      initThreeJS();
+      syncToCurrentTime();
+      animate(); // 描画ループ開始
+    };
+
+    // --- 2. 左側のUIリストを生成 ---
+    function initUI() {
+      cities.forEach(city => {
+        digitalClocks.insertAdjacentHTML('beforeend', `
+          <div class="flex justify-between items-center px-3 py-2.5 rounded-lg bg-slate-800/40 border border-slate-700/50" id="digital-${city.id}">
+            <div class="flex items-center gap-3">
+              <div class="w-2.5 h-2.5 rounded-full shadow-[0_0_5px_currentColor]" style="background-color: ${city.color}; color: ${city.color};"></div>
+              <span class="font-bold text-slate-300 text-sm">${city.name}</span>
+            </div>
+            <div class="font-mono text-xl font-bold text-slate-100 time-val tracking-tighter">--:--</div>
+          </div>
+        `);
+        city.digitalEl = document.querySelector(`#digital-${city.id} .time-val`);
+      });
+    }
+
+    // --- 3. Three.js の3D空間を構築 ---
+    function initThreeJS() {
+      const container = document.getElementById('three-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      // シーンとカメラ
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+      camera.position.set(0, 5, 45); // 少しだけ見下ろす角度
+
+      // レンダラー
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      // マウス操作コントロール
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enablePan = false;
+      controls.minDistance = 20;
+      controls.maxDistance = 70;
+
+      // --- 光源の設定（昼と夜を作る） ---
+      // 全体をわずかに照らす環境光（夜側も真っ暗にならないように）
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+      scene.add(ambientLight);
+
+      // 太陽光：右側(+X方向)から強い平行光を当てる
+      const sunLight = new THREE.DirectionalLight(0xffffff, 1.8);
+      sunLight.position.set(30, 0, 0); 
+      scene.add(sunLight);
+
+      // --- 地球モデルの構築 ---
+      earthGroup = new THREE.Group();
+      // 地軸を23.4度傾ける（北極が右の太陽側へ傾く＝北半球が夏）
+      earthGroup.rotation.z = THREE.MathUtils.degToRad(-23.4);
+      scene.add(earthGroup);
+
+      // 自転するためのグループ
+      rotationGroup = new THREE.Group();
+      earthGroup.add(rotationGroup);
+
+      // 1. 地球の海と陸（ベースの球体）
+      const radius = 12;
+      const sphereGeo = new THREE.SphereGeometry(radius, 48, 48);
+      const sphereMat = new THREE.MeshPhongMaterial({ 
+        color: 0x1e3a8a, // 深い青
+        shininess: 15
+      });
+      const earthMesh = new THREE.Mesh(sphereGeo, sphereMat);
+      rotationGroup.add(earthMesh);
+
+      // 2. 経緯線（ワイヤーフレームで地球儀らしさを出す）
+      const wireGeo = new THREE.SphereGeometry(radius + 0.05, 24, 12);
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0x3b82f6,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.15
+      });
+      const wireMesh = new THREE.Mesh(wireGeo, wireMat);
+      rotationGroup.add(wireMesh);
+
+      // 3. 赤道を強調する線
+      const equatorGeo = new THREE.TorusGeometry(radius + 0.08, 0.04, 8, 64);
+      const equatorMat = new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.5 });
+      const equator = new THREE.Mesh(equatorGeo, equatorMat);
+      equator.rotation.x = Math.PI / 2; // XZ平面に寝かせる
+      rotationGroup.add(equator);
+
+      // 4. 地軸のポール（北極と南極を貫く線）
+      const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, radius * 2.6, 8);
+      const poleMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      earthGroup.add(pole); // earthGroupに直接入れることで自転とは独立して傾きを維持する
+
+      // --- 各都市のピンとラベルを配置 ---
+      cities.forEach(city => {
+        // 3D空間のピン（球）
+        const pinGeo = new THREE.SphereGeometry(0.35, 16, 16);
+        const pinMat = new THREE.MeshBasicMaterial({ color: city.color });
+        const pin = new THREE.Mesh(pinGeo, pinMat);
+        
+        // 緯度・経度から3D極座標へ変換
+        const phi = (90 - city.lat) * (Math.PI / 180); // Y軸からの角度
+        const theta = city.lng * (Math.PI / 180);      // Z軸からの角度
+        pin.position.setFromSphericalCoords(radius + 0.1, phi, theta);
+        
+        rotationGroup.add(pin);
+        city.mesh = pin;
+
+        // HTML上の追従ラベルを作成
+        const label = document.createElement('div');
+        label.className = 'absolute pointer-events-none flex flex-col items-center transition-opacity duration-200';
+        label.innerHTML = `
+          <div class="px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-md border text-[10px] font-bold text-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.8)]" style="border-color: ${city.color}80">
+            ${city.name}
+          </div>
+          <div class="font-mono text-sm font-bold mt-0.5" style="color: ${city.color}; text-shadow: 0 1px 3px #000, 0 1px 3px #000;">--:--</div>
+        `;
+        labelsContainer.appendChild(label);
+        city.labelEl = label;
+        city.timeEl = label.querySelector('.font-mono');
+      });
+
+      // 画面リサイズ対応
+      window.addEventListener('resize', () => {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      });
+    }
+
+    // --- 4. 時間と自転の計算ロジック ---
+    function updateSimulation() {
+      // 1. 地球の自転角度の更新
+      // UTC 0時 のとき、ロンドン(経度0) は夜のど真ん中(-X方向)に来るようにオフセット(-90度)をかける
+      const earthRotate = (totalElapsedMinutes / 1440) * Math.PI * 2 - (Math.PI / 2);
+      rotationGroup.rotation.y = earthRotate;
+
+      // 2. 各都市の時刻計算
+      let utcMinutes = totalElapsedMinutes % 1440;
+      if (utcMinutes < 0) utcMinutes += 1440;
+
+      cities.forEach(item => {
+        let localMins = (utcMinutes + item.offset * 60) % 1440;
+        if (localMins < 0) localMins += 1440;
+        const h = Math.floor(localMins / 60);
+        const m = localMins % 60;
+        const timeString = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        
+        // テキストを更新
+        item.timeEl.innerText = timeString;
+        item.digitalEl.innerText = timeString;
+      });
+    }
+
+    // --- 5. 3D空間のピン位置をHTMLラベルに同期するループ ---
+    const tempV = new THREE.Vector3();
+    const centerV = new THREE.Vector3();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // OrbitControlsの滑らかな動きを更新
+      controls.update();
+      
+      // 3Dの描画
+      renderer.render(scene, camera);
+
+      // HTMLラベルの位置を更新
+      const container = document.getElementById('three-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      // 地球の中心のワールド座標を取得
+      earthGroup.getWorldPosition(centerV);
+      const distToCenter = camera.position.distanceTo(centerV);
+
+      cities.forEach(city => {
+        // ピンのワールド座標を取得
+        city.mesh.getWorldPosition(tempV);
+        
+        // 視界の「裏側」に回ったかどうかの判定
+        // カメラから地球の中心よりも、ピンの方が遠ければ裏側にある
+        const distToPin = camera.position.distanceTo(tempV);
+        if (distToPin > distToCenter) {
+          city.labelEl.style.opacity = '0.15'; // 裏側は暗くする
+          city.labelEl.style.zIndex = '1';
+        } else {
+          city.labelEl.style.opacity = '1';    // 表側はくっきり
+          city.labelEl.style.zIndex = '10';
+        }
+
+        // 3D座標を2Dスクリーン座標に変換
+        tempV.project(camera);
+        const x = (tempV.x * 0.5 + 0.5) * width;
+        const y = (-(tempV.y * 0.5) + 0.5) * height;
+        
+        // ラベルをピンの少し上に配置
+        city.labelEl.style.transform = `translate(-50%, -100%) translate(${x}px, ${y - 15}px)`;
+      });
+    }
+
+    // --- 6. イベントリスナーと現在時刻同期 ---
+    function syncToCurrentTime() {
+      const now = new Date();
+      const utcMins = (now.getUTCHours() * 60) + now.getUTCMinutes();
+      const days = Math.floor(totalElapsedMinutes / 1440);
+      totalElapsedMinutes = days * 1440 + utcMins;
+      
+      slider.value = utcMins;
+      updateSimulation();
+    }
+
+    slider.addEventListener('input', () => {
+      const days = Math.floor(totalElapsedMinutes / 1440);
+      totalElapsedMinutes = days * 1440 + parseInt(slider.value);
+      updateSimulation();
+    });
+
+    playBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playBtn.innerHTML = '⏸️ 停止する';
+        playBtn.classList.replace('bg-blue-600', 'bg-rose-600');
+        playBtn.classList.replace('hover:bg-blue-500', 'hover:bg-rose-500');
+        
+        animationInterval = setInterval(() => {
+          totalElapsedMinutes += 2; // 1回の更新で2分進む
+          
+          let val = totalElapsedMinutes % 1440;
+          if (val < 0) val += 1440;
+          slider.value = val;
+          
+          updateSimulation();
+        }, 30); // 30msごとに滑らかに回転
+      } else {
+        playBtn.innerHTML = '▶️ 自転アニメーション';
+        playBtn.classList.replace('bg-rose-600', 'bg-blue-600');
+        playBtn.classList.replace('hover:bg-rose-500', 'hover:bg-blue-500');
+        clearInterval(animationInterval);
+      }
+    });
+
+    nowBtn.addEventListener('click', () => {
+      if(isPlaying) playBtn.click();
+      syncToCurrentTime();
+    });
+
+  </script>
+</body>
+</html>
