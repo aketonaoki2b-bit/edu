@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>倫理 前期中間考査対策</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --color-bg: #f5f5f5;
+      --color-surface: #ffffff;
+      --color-border: rgba(0,0,0,0.08);
+      --color-divider: rgba(0,0,0,0.06);
+      --color-text: #1d1d1f;
+      --color-text-muted: #6e6e73;
+      --color-text-faint: #aeaeb2;
+      --color-primary: #0071e3;
+      --color-primary-hover: #0077ed;
+      --color-answer: #6495ed;
+      --color-toggle-bg: rgba(0,0,0,0.04);
+      --color-toggle-hover: rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.07);
+      --transition: 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    [data-theme="dark"] {
+      --color-bg: #000000;
+      --color-surface: #1c1c1e;
+      --color-border: rgba(255,255,255,0.1);
+      --color-divider: rgba(255,255,255,0.06);
+      --color-text: #f5f5f7;
+      --color-text-muted: #aeaeb2;
+      --color-text-faint: #636366;
+      --color-primary: #2997ff;
+      --color-primary-hover: #47a8ff;
+      --color-answer: #6495ed;
+      --color-toggle-bg: rgba(255,255,255,0.07);
+      --color-toggle-hover: rgba(255,255,255,0.13);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --color-bg: #000000;
+        --color-surface: #1c1c1e;
+        --color-border: rgba(255,255,255,0.1);
+        --color-divider: rgba(255,255,255,0.06);
+        --color-text: #f5f5f7;
+        --color-text-muted: #aeaeb2;
+        --color-text-faint: #636366;
+        --color-primary: #2997ff;
+        --color-primary-hover: #47a8ff;
+        --color-answer: #6495ed;
+        --color-toggle-bg: rgba(255,255,255,0.07);
+        --color-toggle-hover: rgba(255,255,255,0.13);
+        --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100dvh;
+      line-height: 1.75;
+      font-size: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem);
+      padding: clamp(16px, 4vw, 40px);
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      background: var(--color-surface);
+      padding: clamp(24px, 5vw, 48px);
+      border-radius: 18px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 1rem + 0.8vw, 1.55rem);
+      font-weight: 600;
+      color: var(--color-text);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .theme-toggle {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-toggle-bg);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      transition: background var(--transition), color var(--transition);
+    }
+    .theme-toggle:hover { background: var(--color-toggle-hover); color: var(--color-text); }
+
+    .control-panel {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      background: var(--color-surface);
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 980px;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      letter-spacing: -0.01em;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: #7fffd4; color: #1d1d1f; border: none; }
+    .btn-primary:hover { background: #5de8bc; }
+
+    .btn-secondary {
+      background: var(--color-toggle-bg);
+      color: var(--color-text-muted);
+      border: none;
+    }
+    .btn-secondary:hover { background: var(--color-toggle-hover); color: var(--color-text); }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--color-text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-top: 32px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .question {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--color-divider);
+      font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+    }
+    .question:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-toggle-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 1px 10px;
+      cursor: pointer;
+      font-size: inherit;
+      transition: background var(--transition);
+      vertical-align: middle;
+      min-width: 2.8em;
+    }
+    .toggle:hover { background: var(--color-toggle-hover); }
+
+    .toggle-placeholder {
+      color: var(--color-text-faint);
+      font-size: 0.85em;
+      pointer-events: none;
+    }
+    .toggle.revealed .toggle-placeholder { display: none; }
+
+    .answer {
+      display: none;
+      color: var(--color-answer);
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+    .answer.visible { display: inline; }
+
+    /* 表のためのCSS */
+    .table-container {
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95em;
+    }
+    th, td {
+      border: 1px solid var(--color-border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--color-toggle-bg);
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    @media (max-width: 580px) {
+      .control-panel { flex-wrap: wrap; }
+      .btn { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>
+        倫理　前期中間考査対策
+      </h1>
+      <button class="theme-toggle" data-theme-toggle aria-label="ダークモードに切り替え">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="control-panel">
+      <button class="btn btn-primary" id="show-all">全ての解答を表示</button>
+      <button class="btn btn-secondary" id="hide-all">全ての解答を隠す</button>
+    </div>
+
+    <div id="quiz">
+      <div class="section-title">哲学の始まりと自然哲学</div>
+      
+      <div class="question">
+        1. 哲学の語源は古代ギリシャ語で「知を愛し求める」の意である <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">フィロソフィア</span></span> である。
+      </div>
+      <div class="question">
+        2. <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">合理性</span></span> とは、理性にかなうことであり、論理的に道筋を立てて考えることである。
+      </div>
+      <div class="question">
+        3. <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">普遍性</span></span> とは、すべてにあてはまることであり、いつでもどこでも誰にでも共通の真理であることをいう。
+      </div>
+      <div class="question">
+        4. <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">不可知論</span></span> は哲学の可能性を閉ざす考え方の一つであり、わからないことや知るのが難しいことを諦めてしまうものである。
+      </div>
+      <div class="question">
+        5. <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">独断論</span></span> もまた哲学の可能性を閉ざす考え方であり、自分の価値や見方は絶対に正しいとするものである。
+      </div>
+      <div class="question">
+        6. 哲学にとって重要な態度は、あらゆる考えを常に批判的に検討し健全に疑うという <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">懐疑</span></span> の姿勢を持つことである。
+      </div>
+      <div class="question">
+        7. 哲学による対話が生じる前は、世界の秩序や人間の倫理を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">神話</span></span> によって説明していた。
+      </div>
+      <div class="question">
+        8. 古代ギリシャの都市国家の市民たちは、神話による説明にかわり、人間のことば・論理・理性による思考法である <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">ロゴス</span></span> により真理を探究する哲学を生み出した。
+      </div>
+      <div class="question">
+        9. 自然哲学者たちは、何かの役に立てるために宇宙や人間への問いを追求するのではなく、純粋に知るためだけに考察する <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">テオリア</span></span> を大切にした。テオリアには、深く考えながら観るという意味がある。
+      </div>
+      <div class="question">
+        10. 自然の探究を行った哲学者たちは、生成変化する世界の原因・根拠となる始源である <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">アルケー</span></span> を探究した。
+      </div>
+      <div class="question">
+        11. <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">タレス</span></span> はアルケーを水であるとした。
+      </div>
+      <div class="question">
+        12. アナクシマンドロスはアルケーを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">無限</span></span> であるとした。
+      </div>
+      <div class="question">
+        13. ヘラクレイトスはアルケーを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">火</span></span> であるとした。
+      </div>
+      <div class="question">
+        14. ピタゴラスは、宇宙の調和は <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">数</span></span> で秩序づけられているとした。
+      </div>
+      <div class="question">
+        15. 前５世紀頃ギリシャでは、授業料をとって教育を行う専門知識人である <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">ソフィスト</span></span> が議論の中心的な役割を担った。
+      </div>
+      <div class="question">
+        16. ソフィストは“徳”を意味する <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">アレテー</span></span> の教師として市民教育を行った。（ここでいう徳とは、成功や人に勝つための能力のこと）
+      </div>
+      <div class="question">
+        17. ソフィストの一人であるプロタゴラスは、「人間は万物の <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">尺度</span></span> である」とした。
+      </div>
+      <div class="question">
+        18. 上記17の考え方は、人間一人ひとりの判断が物事の真偽の基準である <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">相対主義</span></span> の代表例である。
+      </div>
+      <div class="question">
+        19. ソフィストの一人であるゴルギアスは、言論により説得する能力を重要視する <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">弁論術</span></span> を教えた。
+      </div>
+
+      <div class="section-title">ソクラテス</div>
+
+      <div class="question">
+        20. ソクラテスは、人々との <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">対話</span></span> (ディアロゴス) による哲学をおこなった。
+      </div>
+      <div class="question">
+        21. ソクラテスは、ソフィストたちは大切なことを知らないにもかかわらず、知っていると思い込んで無知の状態にあることに気づき、知らないことを率直に認める <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">不知の自覚</span></span> をうながした。
+      </div>
+      <div class="question">
+        22. 質問を繰り返すことで相手の考えを深め、矛盾や未解決の問題に気付かせるソクラテスの対話法を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">問答法</span></span> という。
+      </div>
+      <div class="question">
+        23. ソクラテスは人々に対し、「ただ生きるのではなく、 <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">善く生きる</span></span> ことが大切である」とうながした。
+      </div>
+      <div class="question">
+        24. ソクラテスの教えは、デルフォイのアポロン神殿にかかげられていた「 <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">汝自身を知れ</span></span> 」という教訓にあらわれるが、これは自分の無知を知り、真の徳や真理を求めて生きよ、という意味が込められている。
+      </div>
+      <div class="question">
+        25. <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">主知主義</span></span> とは、知識・理性を重視する立場である。
+      </div>
+      <div class="question">
+        26. ソクラテスの問いかけは、相手がみずから知恵を生み出す手助けをするという意味で <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">助産術</span></span> とよばれた。
+      </div>
+
+      <div class="section-title">プラトン</div>
+
+      <div class="question">
+        27. プラトンは、師であるソクラテスの哲学を受けて、その問いかけに向きあう中でイデア論を提示して、 <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">理想主義</span></span> の哲学を打ち出した。
+      </div>
+      <div class="question">
+        28. プラトンはイデアへのあこがれを、 <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">洞窟</span></span> の比喩をはじめとするイメージを用いて示した。
+      </div>
+      <div class="question">
+        29. プラトンは、魂がすでに知っていたイデアを思い出すことである <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">想起</span></span> こそが真理を知る学びであるとした。
+      </div>
+      <div class="question">
+        30. 完全で絶対的なイデアへのあこがれを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">エロース</span></span> という。
+      </div>
+      <div class="question">
+        31. 美しい事物の経験を通じて <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">美</span></span> のイデアに向かう上昇は、魂を真のあり方へと導くとプラトンは考えた。
+      </div>
+      <div class="question">
+        32. より良い生き方の追求の先にあるのが、イデアの中でも最も根源的であり、他のイデアの存在を可能にするものである <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">善</span></span> のイデアである。
+      </div>
+      <div class="question">
+        33. 以下の表をうめよ
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>四元徳</th>
+                <th>説明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">知恵</span></span></td>
+                <td>思慮深く判断する力</td>
+              </tr>
+              <tr>
+                <td><span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">勇気</span></span></td>
+                <td>正義のために恐れず行動する力</td>
+              </tr>
+              <tr>
+                <td><span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">節制</span></span></td>
+                <td>欲望や感情を理性に従わせる力</td>
+              </tr>
+              <tr>
+                <td><span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">正義</span></span></td>
+                <td>各部分が本来の役割を果たし、全体が調和する状態</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="question">
+        34. プラトンは、教育を通じて知恵の徳を培った哲学者が実際の政治にあたる <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">哲人政治</span></span> によってのみ、社会に正義を実現する理想国家が生まれると考えた。
+      </div>
+
+      <div class="section-title">アリストテレス</div>
+
+      <div class="question">
+        35. 事物に内在してそのもののあり方を形作る本質であり、生き物の種に固有の機能や活動をつかさどるものを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">形相（エイドス）</span></span> という。
+      </div>
+      <div class="question">
+        36. 運動や変化の素材となるものであり、生き物の身体などを形成する物質的な材料を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">質料（ヒュレー）</span></span> という。
+      </div>
+      <div class="question">
+        37. 樫の木のどんぐりのように、将来あるものに発展しうる可能性を内に持っている状態を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">可能態</span></span> という。
+      </div>
+      <div class="question">
+        38. 存在がその本質を完全に実現した状態を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">現実態</span></span> といい、どんぐりが成長して完成した樫の大木などがこれにあたる。
+      </div>
+      <div class="question">
+        39. すべての自然物が目的としての最高善を目指して運動・変化しているという、アリストテレスの自然に対する見方を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">目的論的自然観</span></span> という。
+      </div>
+      <div class="question">
+        40. 人間のあらゆる行為や活動が目指す究極の目的であり、アリストテレスが「幸福」の本質であるとしたものを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">最高善</span></span> という。
+      </div>
+      <div class="question">
+        41. 知恵や思慮など、人間の知性に関わる徳であり、主として教育や学習によって育成されるものを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">知性的徳</span></span> という。
+      </div>
+      <div class="question">
+        42. 勇気、節制、正義、友愛など、人間の品性に関わる徳であり、善い行為を習慣づけることによって身につくものを <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">倫理的徳</span></span> という。
+      </div>
+      <div class="question">
+        43. 感情や行動において、過剰と不足の両極端を避けた過不足のない適切な中間の状態を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">中庸</span></span> という。
+      </div>
+      <div class="question">
+        44. 何かの目的や利益を求めず、人間本来の働きである知性を純粋に活動させて真理をじっくりと考える <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">観想（テオリア）</span></span> こそが、人間の最高の幸福である。
+      </div>
+      <div class="question">
+        45. 人間はロゴス（ことば）を用いて議論し、ポリス（都市国家）をつくって生きる存在であることから、アリストテレスは「人間は <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">社会的動物</span></span> である」と定義した。
+      </div>
+      <div class="question">
+        46. 人の能力や名誉、功績などに応じて、富や社会的な資源を比例的に配分する正しいあり方を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">配分的正義</span></span> という。
+      </div>
+      <div class="question">
+        47. 売買や裁判などの日常的なやり取りにおいて生じた不平等や損害を、平等に調整する正義を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">矯正的正義</span></span> という。
+      </div>
+      <div class="question">
+        48. アリストテレスが正義を超える意義をもつ倫理として重視した、お互いに相手の善や幸福を願い合う人間同士の精神的な絆を <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">友愛（フィリア）</span></span> という。
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const toggle = document.querySelector('[data-theme-toggle]');
+      const root = document.documentElement;
+      let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      function apply() {
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        toggle.innerHTML = dark
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+        toggle.setAttribute('aria-label', dark ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
+      }
+      apply();
+      toggle.addEventListener('click', () => { dark = !dark; apply(); });
+    })();
+
+    document.querySelectorAll('.toggle').forEach(el => {
+      el.addEventListener('click', () => {
+        const a = el.querySelector('.answer');
+        const showing = a.classList.contains('visible');
+        a.classList.toggle('visible', !showing);
+        el.classList.toggle('revealed', !showing);
+      });
+    });
+
+    document.getElementById('show-all').addEventListener('click', () => {
+      document.querySelectorAll('.answer').forEach(a => a.classList.add('visible'));
+      document.querySelectorAll('.toggle').forEach(el => el.classList.add('revealed'));
+    });
+
+    document.getElementById('hide-all').addEventListener('click', () => {
+      document.querySelectorAll('.answer').forEach(a => a.classList.remove('visible'));
+      document.querySelectorAll('.toggle').forEach(el => el.classList.remove('revealed'));
+    });
+  </script>
+</body>
+</html>
