@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地理総合 前期中間考査対策</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --color-bg: #f5f5f5;
+      --color-surface: #ffffff;
+      --color-border: rgba(0,0,0,0.08);
+      --color-divider: rgba(0,0,0,0.06);
+      --color-text: #1d1d1f;
+      --color-text-muted: #6e6e73;
+      --color-text-faint: #aeaeb2;
+      --color-primary: #0071e3;
+      --color-primary-hover: #0077ed;
+      --color-answer: #6495ed;
+      --color-toggle-bg: rgba(0,0,0,0.04);
+      --color-toggle-hover: rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.07);
+      --transition: 160ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    [data-theme="dark"] {
+      --color-bg: #000000;
+      --color-surface: #1c1c1e;
+      --color-border: rgba(255,255,255,0.1);
+      --color-divider: rgba(255,255,255,0.06);
+      --color-text: #f5f5f7;
+      --color-text-muted: #aeaeb2;
+      --color-text-faint: #636366;
+      --color-primary: #2997ff;
+      --color-primary-hover: #47a8ff;
+      --color-answer: #6495ed;
+      --color-toggle-bg: rgba(255,255,255,0.07);
+      --color-toggle-hover: rgba(255,255,255,0.13);
+      --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --color-bg: #000000;
+        --color-surface: #1c1c1e;
+        --color-border: rgba(255,255,255,0.1);
+        --color-divider: rgba(255,255,255,0.06);
+        --color-text: #f5f5f7;
+        --color-text-muted: #aeaeb2;
+        --color-text-faint: #636366;
+        --color-primary: #2997ff;
+        --color-primary-hover: #47a8ff;
+        --color-answer: #6495ed;
+        --color-toggle-bg: rgba(255,255,255,0.07);
+        --color-toggle-hover: rgba(255,255,255,0.13);
+        --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100dvh;
+      line-height: 1.75;
+      font-size: clamp(1rem, 0.95rem + 0.25vw, 1.0625rem);
+      padding: clamp(16px, 4vw, 40px);
+      transition: background-color var(--transition), color var(--transition);
+    }
+
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      background: var(--color-surface);
+      padding: clamp(24px, 5vw, 48px);
+      border-radius: 18px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-border);
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 1rem + 0.8vw, 1.55rem);
+      font-weight: 600;
+      color: var(--color-text);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    h1 .subtitle {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      margin-top: 5px;
+      letter-spacing: 0;
+    }
+
+    .theme-toggle {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-toggle-bg);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      transition: background var(--transition), color var(--transition);
+    }
+    .theme-toggle:hover { background: var(--color-toggle-hover); color: var(--color-text); }
+
+    .control-panel {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      background: var(--color-surface);
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 980px;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      letter-spacing: -0.01em;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary { background: #7fffd4; color: #1d1d1f; border: none; }
+    .btn-primary:hover { background: #5de8bc; }
+
+    .btn-secondary {
+      background: var(--color-toggle-bg);
+      color: var(--color-text-muted);
+      border: none;
+    }
+    .btn-secondary:hover { background: var(--color-toggle-hover); color: var(--color-text); }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--color-text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-top: 32px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--color-divider);
+    }
+
+    .question {
+      padding: 11px 0;
+      border-bottom: 1px solid var(--color-divider);
+      font-size: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+    }
+    .question:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-toggle-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 1px 10px;
+      cursor: pointer;
+      font-size: inherit;
+      transition: background var(--transition);
+      vertical-align: middle;
+      min-width: 2.8em;
+    }
+    .toggle:hover { background: var(--color-toggle-hover); }
+
+    .toggle-placeholder {
+      color: var(--color-text-faint);
+      font-size: 0.85em;
+      pointer-events: none;
+    }
+    .toggle.revealed .toggle-placeholder { display: none; }
+
+    .answer {
+      display: none;
+      color: var(--color-answer);
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+    .answer.visible { display: inline; }
+
+    @media (max-width: 580px) {
+      .control-panel { flex-wrap: wrap; }
+      .btn { flex: 1; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>
+        地理総合　前期中間考査対策
+        
+      </h1>
+      <button class="theme-toggle" data-theme-toggle aria-label="ダークモードに切り替え">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="control-panel">
+      <button class="btn btn-primary" id="show-all">全ての解答を表示</button>
+      <button class="btn btn-secondary" id="hide-all">全ての解答を隠す</button>
+    </div>
+
+    <div id="quiz">
+      <div class="section-title">地球の姿と位置の表現</div>
+
+      <div class="question">
+        地球の表面を眺めたときに，陸地が占める割合が最大となるように地球を二分したものを
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">陸半球</span></span>，
+        海洋が占める割合が最大となるように地球を二分したものを
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">水半球</span></span>という。
+      </div>
+
+      <div class="question">
+        地球上の絶対的な位置は，<span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">緯度</span></span>と
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">経度</span></span>によって表すことができる。
+      </div>
+
+      <div class="question">
+        同じ緯度の地点を結んだ線は <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">緯線</span></span>，
+        同じ経度の地点を結んだ線は <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">経線</span></span>とよばれる。
+      </div>
+
+      <div class="question">
+        旧グリニッジ天文台を通る経度0度の線は <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">本初子午線</span></span>とよばれる。
+      </div>
+
+      <div class="question">
+        夏至の正午に太陽の真下になるのが北緯23.4度の <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">北回帰線</span></span>，
+        冬至の正午に太陽の真下になるのが南緯23.4度の <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">南回帰線</span></span>である。
+      </div>
+
+      <div class="question">
+        北極圏や南極圏では，夏には太陽が沈まない <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">白夜</span></span>，
+        冬には正午でも太陽が昇らない <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">極夜</span></span>という現象が起こる。
+      </div>
+
+      <div class="section-title">時差と標準時</div>
+
+      <div class="question">
+        地球は自転によって1日（24時間）でほぼ1回転（360度）する。その結果，経度
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">15</span></span>度ごとに1時間の
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">時差</span></span>が生じる。
+      </div>
+
+      <div class="question">
+        本初子午線が <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">グリニッジ標準時</span></span>（GMT）として国際的な時刻の基準に定められると，
+        各国・地域は標準時子午線を定めて <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">標準時</span></span>の基とした。
+      </div>
+
+      <div class="question">
+        日本では，兵庫県明石市を通る東経 <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">135</span></span>度を標準時子午線とした。
+      </div>
+
+      <div class="question">
+        1日分の時間差を調整するため，<span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">日付変更線</span></span>が経度180度の線を基準に設定されている。
+      </div>
+
+      <div class="question">
+        ヨーロッパや北アメリカなどでは，日照時間が長くなる夏季に時刻を1時間程度進める
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">サマータイム</span></span>制度を実施している国もある。
+      </div>
+
+      <div class="section-title">地図投影法と特徴</div>
+
+      <div class="question">
+        球面である地球表面を平面の地図で表すと，さまざまな <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">ひずみ</span></span>が生じる。
+      </div>
+
+      <div class="question">
+        平面の地図では，角度・距離・方位・面積などの要素を同時に正しく表現することができないため，
+        さまざまな <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">地図投影法</span></span>（図法）が用いられる。
+      </div>
+
+      <div class="question">
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">メルカトル図法</span></span>の地図は，
+        緯線・経線に対する角度や形の関係が正しい <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">正角図</span></span>であり，
+        地図上の任意の2点を結んだ直線が <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">等角航路</span></span>を示す。
+      </div>
+
+      <div class="question">
+        図の中心からの距離と方位が正しい <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">正距方位図法</span></span>の地図は，
+        図の中心からの最短距離である <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">大圏航路</span></span>が直線で表される。
+      </div>
+
+      <div class="question">
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">ホモロサイン図法</span></span>（グード図法）は，
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">サンソン図法</span></span>と
+        <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">モルワイデ図法</span></span>を接合したもので，
+        面積の関係が正しい <span class="toggle"><span class="toggle-placeholder">（　）</span><span class="answer">正積図</span></span>として分布を示す際に利用される。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const toggle = document.querySelector('[data-theme-toggle]');
+      const root = document.documentElement;
+      let dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      function apply() {
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        toggle.innerHTML = dark
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+        toggle.setAttribute('aria-label', dark ? 'ライトモードに切り替え' : 'ダークモードに切り替え');
+      }
+      apply();
+      toggle.addEventListener('click', () => { dark = !dark; apply(); });
+    })();
+
+    document.querySelectorAll('.toggle').forEach(el => {
+      el.addEventListener('click', () => {
+        const a = el.querySelector('.answer');
+        const showing = a.classList.contains('visible');
+        a.classList.toggle('visible', !showing);
+        el.classList.toggle('revealed', !showing);
+      });
+    });
+
+    document.getElementById('show-all').addEventListener('click', () => {
+      document.querySelectorAll('.answer').forEach(a => a.classList.add('visible'));
+      document.querySelectorAll('.toggle').forEach(el => el.classList.add('revealed'));
+    });
+
+    document.getElementById('hide-all').addEventListener('click', () => {
+      document.querySelectorAll('.answer').forEach(a => a.classList.remove('visible'));
+      document.querySelectorAll('.toggle').forEach(el => el.classList.remove('revealed'));
+    });
+  </script>
+</body>
+</html>
